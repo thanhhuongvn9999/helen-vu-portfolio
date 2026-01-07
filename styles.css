@@ -1453,3 +1453,12 @@ flex-direction: column;
   transform: translateY(-1px);   /* subtle lift */
 }
 
+/* ============================= */
+/* Contact – Send Message button font */
+/* ============================= */
+
+.contact-form button,
+.contact-form .primary-btn {
+  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+

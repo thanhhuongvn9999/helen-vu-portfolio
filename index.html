@@ -954,6 +954,9 @@ Product vision, Roadmap prioritization, Agile backlog management, Product discov
     </main> <!-- .main -->
   </div> <!-- .page-layout -->
 
+<!-- ✅ EmailJS library (ADD THIS LINE) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   // =============================
@@ -1218,17 +1221,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const allBox = boxes.find((b) => b.value === "__all__");
       const others = boxes.filter((b) => b.value !== "__all__");
 
-      // Clicking All => turn off others
       if (t.value === "__all__" && t.checked) {
         others.forEach((b) => (b.checked = false));
       }
-
-      // Clicking any other => turn off All
       if (t.value !== "__all__" && t.checked) {
         if (allBox) allBox.checked = false;
       }
-
-      // If none selected => revert All
       const anyOtherChecked = others.some((b) => b.checked);
       if (!anyOtherChecked && allBox && !allBox.checked) {
         allBox.checked = true;
@@ -1315,6 +1313,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updatePills();
     applyFiltersAndSort();
+  }
+
+  // =============================
+  // ✅ Contact Form — EmailJS (ADDED)
+  // =============================
+  const EMAILJS_PUBLIC_KEY = "bDr9U0AMBEfmBl6z3";
+  const EMAILJS_SERVICE_ID = "service_qjjmsek";
+
+  // Template IDs (from your EmailJS screenshot)
+  const TEMPLATE_TO_YOU  = "template_0escg43";
+  const TEMPLATE_TO_USER = "template_ps0p6rs";
+
+  if (window.emailjs) {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+
+  const contactForm = document.getElementById("contact-form");
+
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn ? submitBtn.textContent : "";
+
+      const from_name = document.getElementById("name")?.value.trim();
+      const reply_to  = document.getElementById("email")?.value.trim();
+      const subject   = document.getElementById("subject")?.value.trim();
+      const message   = document.getElementById("message")?.value.trim();
+
+      if (!from_name || !reply_to || !subject || !message) {
+        alert("Please fill in all fields before sending.");
+        return;
+      }
+
+      const templateParams = { from_name, reply_to, subject, message };
+
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Sending...";
+        }
+
+        // 1) Send email to YOU
+        await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_YOU, templateParams);
+
+        // 2) Auto-reply email to USER
+        await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_USER, templateParams);
+
+        alert("✅ Message sent! I’ll get back to you within 48 hours.");
+        contactForm.reset();
+      } catch (err) {
+        console.error("EmailJS error:", err);
+        alert("❌ Something went wrong. Please email me directly.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
+      }
+    });
   }
 });
 </script>

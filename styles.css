@@ -1485,27 +1485,4 @@ flex-direction: column;
   }
 }
 
-/* ============================= */
-/* Mobile nav: vertical stack */
-/* ============================= */
-@media (max-width: 640px) {
-  .tab-nav{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    padding: 10px;
-    border-radius: 26px;
-
-    justify-content: flex-start; /* override desktop spacing */
-  }
-
-  .tab-link{
-    width: 100%;
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    text-align: center;
-  }
-}
-
 

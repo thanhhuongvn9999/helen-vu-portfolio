@@ -292,6 +292,7 @@ body {
   box-shadow: 0 18px 40px rgba(0,0,0,0.55);
   cursor: pointer;
   align-self: start;
+ overflow: hidden; 
   transition: transform 0.18s ease,
               box-shadow 0.18s ease,
               border-color 0.18s ease;

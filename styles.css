@@ -261,23 +261,21 @@ body {
 /* Expertise grid */
 /* ============================= */
 
-/* Desktop */
-.expertise-grid {
+.expertise-grid{
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+  align-items: start; /* 🔑 prevents row stretch */
 }
 
-/* Tablet */
-@media (max-width: 1024px) {
-  .expertise-grid {
+@media (max-width: 1024px){
+  .expertise-grid{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* Mobile */
-@media (max-width: 640px) {
-  .expertise-grid {
+@media (max-width: 640px){
+  .expertise-grid{
     grid-template-columns: 1fr;
   }
 }
@@ -286,86 +284,79 @@ body {
 /* Expertise card */
 /* ============================= */
 
-.expertise-card {
+.expertise-card{
   background: var(--bg-card);
   border-radius: var(--radius-md);
-  padding: 22px 22px 20px;
+  padding: 18px;
   border: 1px solid rgba(15, 23, 42, 0.7);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
   cursor: pointer;
   transition: transform 0.18s ease,
               box-shadow 0.18s ease,
               border-color 0.18s ease;
-  outline: none;
+  align-self: start; /* 🔑 critical fix */
 }
 
-.expertise-card:hover {
+.expertise-card:hover{
   transform: translateY(-2px);
-  border-color: rgba(250, 204, 21, 0.25);
+  border-color: rgba(250,204,21,0.35);
 }
 
-.expertise-card:focus-visible {
-  border-color: rgba(250, 204, 21, 0.45);
-  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.10), 0 18px 40px rgba(0, 0, 0, 0.55);
+/* keep yellow border when open */
+.expertise-card.is-open{
+  border-color: rgba(250,204,21,0.45);
 }
 
 /* ============================= */
-/* Card header (icon above title, chevron below) */
+/* Header layout */
 /* ============================= */
 
-.expertise-head {
-  display: flex;
-  flex-direction: column;
+.expertise-head{
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  text-align: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.expertise-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+/* smaller icon, left */
+.expertise-icon{
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  flex-shrink: 0;
+  background: rgba(15,23,42,0.65);
+  border: 1px solid rgba(148,163,184,0.15);
 }
 
-.expertise-icon i {
-  font-size: 22px;
+.expertise-icon i{
+  font-size: 18px;
   color: var(--accent);
-  opacity: 0.9;
 }
 
-.expertise-title {
-  font-size: 0.92rem;
-  font-weight: 650;
-  margin: 0;
-  line-height: 1.25;
+/* title right of icon */
+.expertise-title{
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-.nowrap {
-  white-space: nowrap;
-}
-
-/* Chevron below title */
-.expertise-chevron {
-  width: 34px;
-  height: 34px;
+/* chevron centered vertically on right */
+.expertise-chevron{
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  flex-shrink: 0;
+  background: rgba(15,23,42,0.55);
+  border: 1px solid rgba(148,163,184,0.15);
 }
 
-.expertise-chevron i {
-  font-size: 0.85rem;
-  color: rgba(250, 204, 21, 0.9);
+.expertise-chevron i{
+  font-size: 0.8rem;
+  color: rgba(250,204,21,0.9);
   transition: transform 0.18s ease;
 }
 
@@ -373,26 +364,24 @@ body {
 /* Expandable content */
 /* ============================= */
 
-.expertise-body {
+.expertise-body{
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.22s ease;
 }
 
-/* spacing only when open */
-.expertise-card.is-open .expertise-body {
+.expertise-card.is-open .expertise-body{
   margin-top: 12px;
 }
 
-.expertise-text {
-  font-size: 0.80rem;
+.expertise-text{
+  font-size: 0.8rem;
   line-height: 1.6;
   color: var(--text-muted);
-  text-align: left;
 }
 
 /* rotate chevron when open */
-.expertise-card.is-open .expertise-chevron i {
+.expertise-card.is-open .expertise-chevron i{
   transform: rotate(180deg);
 }
 

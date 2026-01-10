@@ -296,6 +296,7 @@ body {
   transition: transform 0.18s ease,
               box-shadow 0.18s ease,
               border-color 0.18s ease;
+  outline: none;
 }
 
 .expertise-card:hover {
@@ -303,19 +304,26 @@ body {
   border-color: rgba(250, 204, 21, 0.25);
 }
 
+.expertise-card:focus-visible {
+  border-color: rgba(250, 204, 21, 0.45);
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.10), 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
 /* ============================= */
-/* Card header (icon + title + chevron) */
+/* Card header (icon above title, chevron below) */
 /* ============================= */
 
 .expertise-head {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  text-align: center;
+  gap: 10px;
 }
 
 .expertise-icon {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
   display: flex;
   align-items: center;
@@ -332,17 +340,17 @@ body {
 }
 
 .expertise-title {
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 650;
   margin: 0;
-  flex: 1;
+  line-height: 1.25;
 }
 
 .nowrap {
   white-space: nowrap;
 }
 
-/* Chevron */
+/* Chevron below title */
 .expertise-chevron {
   width: 34px;
   height: 34px;
@@ -373,19 +381,21 @@ body {
 
 /* spacing only when open */
 .expertise-card.is-open .expertise-body {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .expertise-text {
   font-size: 0.80rem;
   line-height: 1.6;
   color: var(--text-muted);
+  text-align: left;
 }
 
 /* rotate chevron when open */
 .expertise-card.is-open .expertise-chevron i {
   transform: rotate(180deg);
 }
+
 
 
 /* Testimonials */

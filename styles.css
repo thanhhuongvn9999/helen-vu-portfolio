@@ -419,6 +419,13 @@ body {
   color: var(--text-muted);
 }
 
+.expertise-card{
+  padding-bottom: 18px;   /* base */
+}
+
+.expertise-card.is-open{
+  padding-bottom: 30px;   /* ✅ matches top spacing visually */
+}
 
 
 

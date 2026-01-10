@@ -1261,117 +1261,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 /* =============================
-   Expertise cards (multi-open + equal heights)
+   Expertise cards (multi-open, fixed heights via CSS)
 ============================= */
 const expertiseGrid = document.getElementById("expertiseGrid");
 
-const EXPAND_MS = 260; // CSS transition 0.22s + small buffer
-let equalizeTimer = null;
-
-function scheduleEqualize(delay = 0){
-  window.clearTimeout(equalizeTimer);
-  equalizeTimer = window.setTimeout(() => {
-    equalizeHeights();
-  }, delay);
-}
-
-function setExpandedBodyHeight(body){
-  body.style.maxHeight = body.scrollHeight + "px";
-
-  body.addEventListener("transitionend", function handler(e){
-    if (e.propertyName !== "max-height") return;
-    body.style.maxHeight = "none";
-    body.removeEventListener("transitionend", handler);
-
-    // After it becomes natural height, re-equalize
-    scheduleEqualize(0);
-  });
-}
-
-function openExpertise(card){
-  const body = card.querySelector(".expertise-body");
-  if (!body) return;
-
-  card.classList.add("is-open");
-  body.setAttribute("aria-hidden", "false");
-
-  setExpandedBodyHeight(body);
-}
-
-function closeExpertise(card){
-  const body = card.querySelector(".expertise-body");
-  if (!body) return;
-
-  card.classList.remove("is-open");
-  body.setAttribute("aria-hidden", "true");
-
-  // If it was natural height, pin it to px first so it can animate closed
-  if (body.style.maxHeight === "none"){
-    body.style.maxHeight = body.scrollHeight + "px";
-  }
-
-  body.offsetHeight; // force reflow
-  body.style.maxHeight = "0px";
-}
-
 function toggleExpertise(card){
-  if (card.classList.contains("is-open")) closeExpertise(card);
-  else openExpertise(card);
+  card.classList.toggle("is-open");
 
-  // Wait until expand or collapse animation completes, then equalize
-  scheduleEqualize(EXPAND_MS);
-}
-
-/* Equal height logic */
-function equalizeHeights(){
-  if (!expertiseGrid) return;
-
-  const cards = Array.from(expertiseGrid.querySelectorAll(".expertise-card"));
-  if (!cards.length) return;
-
-  // reset to natural heights first
-  cards.forEach((c) => {
-    c.style.height = "auto";
-  });
-
-  // measure tallest rendered card (more accurate than offsetHeight)
-  let maxH = 0;
-  cards.forEach((c) => {
-    const h = c.getBoundingClientRect().height;
-    if (h > maxH) maxH = h;
-  });
-
-  // apply same height to all
-  const finalH = Math.ceil(maxH);
-  cards.forEach((c) => {
-    c.style.height = finalH + "px";
-  });
+  // accessibility
+  const body = card.querySelector(".expertise-body");
+  if (body){
+    body.setAttribute("aria-hidden", card.classList.contains("is-open") ? "false" : "true");
+  }
 }
 
 if (expertiseGrid){
-  // init all collapsed
+  // init aria state
   expertiseGrid.querySelectorAll(".expertise-card").forEach((card) => {
     const body = card.querySelector(".expertise-body");
-    if (!body) return;
-    body.style.maxHeight = "0px";
-    body.setAttribute("aria-hidden", "true");
+    if (body) body.setAttribute("aria-hidden", "true");
   });
-
-  // equalize collapsed heights on load
-  requestAnimationFrame(() => equalizeHeights());
 
   expertiseGrid.addEventListener("click", (e) => {
     const card = e.target.closest(".expertise-card");
     if (!card) return;
-
-    // optional: ignore clicks on the body text area if you want fewer accidental toggles
-    // if (e.target.closest(".expertise-text")) return;
-
     toggleExpertise(card);
-  });
-
-  window.addEventListener("resize", () => {
-    scheduleEqualize(60);
   });
 }
 

@@ -257,32 +257,26 @@ body {
 }
 
 
-/* ============================= */
-/* Expertise grid */
-/* ============================= */
-
+/* same height for all cards when collapsed and when expanded */
 .expertise-grid{
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  align-items: start; /* prevents row stretch */
+  align-items: start;
 }
 
 @media (max-width: 1024px){
-  .expertise-grid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .expertise-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-
 @media (max-width: 640px){
-  .expertise-grid{
-    grid-template-columns: 1fr;
-  }
+  .expertise-grid{ grid-template-columns: 1fr; }
 }
 
-/* ============================= */
-/* Expertise card */
-/* ============================= */
+/* set your two sizes here */
+:root{
+  --expertise-collapsed-h: 128px;
+  --expertise-expanded-h: 260px;
+}
 
 .expertise-card{
   background: var(--bg-card);
@@ -291,11 +285,16 @@ body {
   border: 1px solid rgba(15, 23, 42, 0.7);
   box-shadow: 0 18px 40px rgba(0,0,0,0.55);
   cursor: pointer;
-  align-self: start;
- overflow: hidden; 
+
+  height: var(--expertise-collapsed-h);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
   transition: transform 0.18s ease,
               box-shadow 0.18s ease,
-              border-color 0.18s ease;
+              border-color 0.18s ease,
+              height 0.22s ease;
 }
 
 .expertise-card:hover{
@@ -303,16 +302,12 @@ body {
   border-color: rgba(250,204,21,0.35);
 }
 
-/* keep yellow border when open */
 .expertise-card.is-open{
+  height: var(--expertise-expanded-h);
   border-color: rgba(250,204,21,0.45);
 }
 
-/* ============================= */
-/* Header layout */
-/* icon left, title right, chevron centered below */
-/* ============================= */
-
+/* Header layout stays the same as your current grid header */
 .expertise-head{
   display: grid;
   grid-template-columns: auto 1fr;
@@ -369,31 +364,33 @@ body {
   transition: transform 0.18s ease;
 }
 
-/* rotate chevron when open */
 .expertise-card.is-open .expertise-chevron i{
   transform: rotate(180deg);
 }
 
-/* ============================= */
-/* Expandable content */
-/* ============================= */
-
+/* Body fills remaining space and scrolls if text is long */
 .expertise-body{
-  max-height: 0;
+  margin-top: 12px;
+  flex: 1;
   overflow: hidden;
-  transition: max-height 0.22s ease;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-/* spacing only when open */
 .expertise-card.is-open .expertise-body{
-  margin-top: 12px;
+  opacity: 1;
+  transform: translateY(0);
+  overflow: auto; /* scroll inside when content is long */
 }
 
 .expertise-text{
   font-size: 0.8rem;
   line-height: 1.6;
   color: var(--text-muted);
+  padding-right: 6px; /* gives space from scrollbar */
 }
+
 
 
 

@@ -1242,6 +1242,18 @@ flex-direction: column;
   color: rgba(250,204,21,0.85);
 }
 
+/* Selected filter text = content style */
+.multi-pill-text{
+  font-size: 0.85rem;            /* same as content text */
+  font-weight: 400;             /* remove heading boldness */
+  line-height: 1.4;
+  color: var(--text-muted);      /* match body/content color */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;       /* prevents overflow */
+  max-width: 100%;
+}
+
 /* =============================
    FILTER DROPDOWN (header + search + tighter spacing)
 ============================= */

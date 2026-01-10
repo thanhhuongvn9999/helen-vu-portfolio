@@ -1261,15 +1261,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 /* =============================
-   Expertise cards (multi-open, isolated height)
+   Expertise cards (multi-open + equal heights)
 ============================= */
 const expertiseGrid = document.getElementById("expertiseGrid");
 
-function openExpertise(card){
-  const body = card.querySelector(".expertise-body");
-  if (!body) return;
-
-  card.classList.add("is-open");
+function setExpandedBodyHeight(card, body){
   body.style.maxHeight = body.scrollHeight + "px";
 
   body.addEventListener("transitionend", function handler(e){
@@ -1279,11 +1275,22 @@ function openExpertise(card){
   });
 }
 
+function openExpertise(card){
+  const body = card.querySelector(".expertise-body");
+  if (!body) return;
+
+  card.classList.add("is-open");
+  body.setAttribute("aria-hidden", "false");
+
+  setExpandedBodyHeight(card, body);
+}
+
 function closeExpertise(card){
   const body = card.querySelector(".expertise-body");
   if (!body) return;
 
   card.classList.remove("is-open");
+  body.setAttribute("aria-hidden", "true");
 
   if (body.style.maxHeight === "none"){
     body.style.maxHeight = body.scrollHeight + "px";
@@ -1299,16 +1306,55 @@ function toggleExpertise(card){
     : openExpertise(card);
 }
 
-if (expertiseGrid){
-  expertiseGrid.querySelectorAll(".expertise-card").forEach(card => {
-    const body = card.querySelector(".expertise-body");
-    if (body) body.style.maxHeight = "0px";
+/* Equal height logic */
+function equalizeHeights(){
+  if (!expertiseGrid) return;
+
+  const cards = Array.from(expertiseGrid.querySelectorAll(".expertise-card"));
+  if (!cards.length) return;
+
+  // reset first so we measure natural heights
+  cards.forEach(c => c.style.height = "auto");
+
+  // If any card is open, equalize to the tallest currently rendered card.
+  // If none open, equalize to the tallest collapsed card.
+  let maxH = 0;
+  cards.forEach(c => {
+    const h = c.offsetHeight;
+    if (h > maxH) maxH = h;
   });
 
-  expertiseGrid.addEventListener("click", e => {
+  // apply equal height to all
+  cards.forEach(c => c.style.height = maxH + "px");
+}
+
+if (expertiseGrid){
+  // init all collapsed
+  expertiseGrid.querySelectorAll(".expertise-card").forEach(card => {
+    const body = card.querySelector(".expertise-body");
+    if (!body) return;
+    body.style.maxHeight = "0px";
+    body.setAttribute("aria-hidden", "true");
+  });
+
+  // first equalize collapsed heights
+  requestAnimationFrame(equalizeHeights);
+
+  expertiseGrid.addEventListener("click", (e) => {
     const card = e.target.closest(".expertise-card");
     if (!card) return;
+
     toggleExpertise(card);
+
+    // After the toggle starts, recompute heights
+    requestAnimationFrame(() => {
+      equalizeHeights();
+    });
+  });
+
+  // Re-equalize on resize (important for responsive wrapping)
+  window.addEventListener("resize", () => {
+    requestAnimationFrame(equalizeHeights);
   });
 }
 

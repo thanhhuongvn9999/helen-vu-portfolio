@@ -1142,273 +1142,310 @@ document.addEventListener("DOMContentLoaded", () => {
   initResumeCollapse();
 
 
-   /* =============================
-     Portfolio sort + filter (multi-select + Done + Search)
-  ============================= */
-  const workGrid = document.querySelector(".work-grid");
-  const cards = Array.from(document.querySelectorAll(".work-card"));
-  const sortSelect = document.getElementById("sortSelect");
+/* =============================
+   Portfolio sort + filter (multi-select + Done + Search + Select All)
+============================= */
+const workGrid = document.querySelector(".work-grid");
+const cards = Array.from(document.querySelectorAll(".work-card"));
+const sortSelect = document.getElementById("sortSelect");
 
-  const companyBtn = document.getElementById("companyBtn");
-  const skillBtn = document.getElementById("skillBtn");
-  const companyMenu = document.getElementById("companyMenu");
-  const skillMenu = document.getElementById("skillMenu");
-  const companyLabel = document.getElementById("companyLabel");
-  const skillLabel = document.getElementById("skillLabel");
+const companyBtn = document.getElementById("companyBtn");
+const skillBtn = document.getElementById("skillBtn");
+const companyMenu = document.getElementById("companyMenu");
+const skillMenu = document.getElementById("skillMenu");
+const companyLabel = document.getElementById("companyLabel");
+const skillLabel = document.getElementById("skillLabel");
 
-  const norm = (s) => (s || "").trim();
+const norm = (s) => (s || "").trim();
 
-  function getCompany(card){
-    return norm(card.dataset.company);
+function getCompany(card) {
+  return norm(card.dataset.company);
+}
+
+function getSkills(card) {
+  return norm(card.dataset.skills).split(",").map(norm).filter(Boolean);
+}
+
+function timeValue(card) {
+  const raw = norm(card.dataset.time);
+  if (!raw) return 0;
+  const iso = /^\d{4}-\d{2}$/.test(raw) ? `${raw}-01` : raw;
+  const t = Date.parse(iso);
+  return Number.isFinite(t) ? t : 0;
+}
+
+// Unique lists
+const allCompanies = Array.from(new Set(cards.map(getCompany)))
+  .filter(Boolean)
+  .sort((a, b) => a.localeCompare(b));
+
+const allSkills = Array.from(new Set(cards.flatMap(getSkills)))
+  .filter(Boolean)
+  .sort((a, b) => a.localeCompare(b));
+
+// Selected sets
+const selectedCompanies = new Set();
+const selectedSkills = new Set();
+
+function updatePillLabels() {
+  if (companyLabel) {
+    companyLabel.textContent = selectedCompanies.size
+      ? Array.from(selectedCompanies).join(", ")
+      : "All";
+  }
+  if (skillLabel) {
+    skillLabel.textContent = selectedSkills.size
+      ? Array.from(selectedSkills).join(", ")
+      : "All";
+  }
+}
+
+function closeAllMenus() {
+  document.querySelectorAll(".multi-pill.is-open").forEach((p) => p.classList.remove("is-open"));
+  if (companyMenu) companyMenu.classList.remove("open");
+  if (skillMenu) skillMenu.classList.remove("open");
+  if (companyBtn) companyBtn.setAttribute("aria-expanded", "false");
+  if (skillBtn) skillBtn.setAttribute("aria-expanded", "false");
+}
+
+function openMenu(pillEl, btnEl, menuEl) {
+  closeAllMenus();
+  pillEl.classList.add("is-open");
+  menuEl.classList.add("open");
+  btnEl.setAttribute("aria-expanded", "true");
+}
+
+function toggleMenu(pillEl, btnEl, menuEl) {
+  const isOpen = pillEl.classList.contains("is-open");
+  if (isOpen) closeAllMenus();
+  else openMenu(pillEl, btnEl, menuEl);
+}
+
+function applyFiltersAndSort() {
+  if (!workGrid) return;
+
+  const sortVal = sortSelect?.value || "time-desc";
+
+  let filtered = cards.filter((card) => {
+    const companyOk = selectedCompanies.size === 0 || selectedCompanies.has(getCompany(card));
+    const skills = getSkills(card);
+    const skillOk = selectedSkills.size === 0 || skills.some((s) => selectedSkills.has(s));
+    return companyOk && skillOk;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortVal === "time-desc") return timeValue(b) - timeValue(a);
+    if (sortVal === "time-asc") return timeValue(a) - timeValue(b);
+    if (sortVal === "company-asc") return getCompany(a).localeCompare(getCompany(b));
+    if (sortVal === "company-desc") return getCompany(b).localeCompare(getCompany(a));
+    return 0;
+  });
+
+  workGrid.innerHTML = "";
+  filtered.forEach((c) => workGrid.appendChild(c));
+}
+
+function buildMenu(menuEl, items, type) {
+  if (!menuEl) return;
+
+  menuEl.innerHTML = "";
+
+  // Prevent clicks inside from closing dropdown
+  menuEl.addEventListener("click", (e) => e.stopPropagation());
+
+  const header = document.createElement("div");
+  header.className = "multi-menu-header";
+
+  const doneBtn = document.createElement("button");
+  doneBtn.type = "button";
+  doneBtn.textContent = "Done";
+  doneBtn.setAttribute("data-done", "1");
+
+  const search = document.createElement("input");
+  search.type = "text";
+  search.className = "multi-search";
+  search.placeholder = "Search...";
+
+  header.appendChild(doneBtn);
+  header.appendChild(search);
+
+  const body = document.createElement("div");
+  body.className = "multi-menu-body";
+
+  // Select All row (Excel-like)
+  const selectAllRow = document.createElement("label");
+  selectAllRow.className = "multi-item multi-item-selectall";
+  selectAllRow.setAttribute("role", "option");
+
+  const selectAllCb = document.createElement("input");
+  selectAllCb.type = "checkbox";
+  selectAllCb.value = "__select_all__";
+
+  const selectAllText = document.createElement("span");
+  selectAllText.textContent = "(Select All)";
+
+  selectAllRow.appendChild(selectAllCb);
+  selectAllRow.appendChild(selectAllText);
+  body.appendChild(selectAllRow);
+
+  // Build option rows
+  items.forEach((value) => {
+    const row = document.createElement("label");
+    row.className = "multi-item";
+    row.setAttribute("role", "option");
+    row.dataset.value = value.toLowerCase();
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.value = value;
+
+    if (type === "company" && selectedCompanies.has(value)) cb.checked = true;
+    if (type === "skill" && selectedSkills.has(value)) cb.checked = true;
+
+    const text = document.createElement("span");
+    text.textContent = value;
+
+    row.appendChild(cb);
+    row.appendChild(text);
+    body.appendChild(row);
+  });
+
+  menuEl.appendChild(header);
+  menuEl.appendChild(body);
+
+  function getVisibleItemCheckboxes() {
+    const itemRows = Array.from(body.querySelectorAll(".multi-item"))
+      .filter((r) => !r.classList.contains("multi-item-selectall"))
+      .filter((r) => r.style.display !== "none");
+
+    return itemRows
+      .map((r) => r.querySelector('input[type="checkbox"]'))
+      .filter(Boolean);
   }
 
-  function getSkills(card){
-    return norm(card.dataset.skills).split(",").map(norm).filter(Boolean);
-  }
-
-  function timeValue(card){
-    const raw = norm(card.dataset.time);
-    if (!raw) return 0;
-    const iso = /^\d{4}-\d{2}$/.test(raw) ? `${raw}-01` : raw;
-    return Date.parse(iso) || 0;
-  }
-
-  const allCompanies = Array.from(new Set(cards.map(getCompany)))
-    .filter(Boolean)
-    .sort((a,b)=>a.localeCompare(b));
-
-  const allSkills = Array.from(new Set(cards.flatMap(getSkills)))
-    .filter(Boolean)
-    .sort((a,b)=>a.localeCompare(b));
-
-  const selectedCompanies = new Set();
-  const selectedSkills = new Set();
-
-  function updatePillLabels(){
-    if (companyLabel){
-      companyLabel.textContent = selectedCompanies.size ? Array.from(selectedCompanies).join(", ") : "All";
+  function syncSelectAllState() {
+    const boxes = getVisibleItemCheckboxes();
+    if (!boxes.length) {
+      selectAllCb.checked = false;
+      selectAllCb.indeterminate = false;
+      return;
     }
-    if (skillLabel){
-      skillLabel.textContent = selectedSkills.size ? Array.from(selectedSkills).join(", ") : "All";
+
+    const checkedCount = boxes.filter((b) => b.checked).length;
+
+    if (checkedCount === 0) {
+      selectAllCb.checked = false;
+      selectAllCb.indeterminate = false;
+    } else if (checkedCount === boxes.length) {
+      selectAllCb.checked = true;
+      selectAllCb.indeterminate = false;
+    } else {
+      selectAllCb.checked = false;
+      selectAllCb.indeterminate = true;
     }
   }
 
-  function closeAllMenus(){
-    document.querySelectorAll(".multi-pill.is-open").forEach(p => p.classList.remove("is-open"));
-    if (companyMenu) companyMenu.classList.remove("open");
-    if (skillMenu) skillMenu.classList.remove("open");
-    if (companyBtn) companyBtn.setAttribute("aria-expanded","false");
-    if (skillBtn) skillBtn.setAttribute("aria-expanded","false");
-  }
-
-  function openMenu(pillEl, btnEl, menuEl){
+  // Done closes only
+  doneBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
     closeAllMenus();
-    pillEl.classList.add("is-open");
-    menuEl.classList.add("open");
-    btnEl.setAttribute("aria-expanded","true");
-  }
+  });
 
-  function toggleMenu(pillEl, btnEl, menuEl){
-    const isOpen = pillEl.classList.contains("is-open");
-    if (isOpen) closeAllMenus();
-    else openMenu(pillEl, btnEl, menuEl);
-  }
+  // Search filters visible rows, then resync Select All
+  search.addEventListener("input", () => {
+    const q = norm(search.value).toLowerCase();
 
-  function buildMenu(menuEl, items, type){
-    if (!menuEl) return;
+    const rows = Array.from(body.querySelectorAll(".multi-item"))
+      .filter((r) => !r.classList.contains("multi-item-selectall"));
 
-    menuEl.innerHTML = "";
-
-    // Prevent inside clicks from closing the dropdown
-    menuEl.addEventListener("click", (e) => e.stopPropagation());
-
-    const header = document.createElement("div");
-    header.className = "multi-menu-header";
-
-    const doneBtn = document.createElement("button");
-    doneBtn.type = "button";
-    doneBtn.textContent = "Done";
-    doneBtn.setAttribute("data-done", "1");
-
-    const search = document.createElement("input");
-    search.type = "text";
-    search.className = "multi-search";
-    search.placeholder = "Search...";
-
-    header.appendChild(doneBtn);
-    header.appendChild(search);
-
-    const body = document.createElement("div");
-    body.className = "multi-menu-body";
-
-    items.forEach((value) => {
-      const row = document.createElement("label");
-      row.className = "multi-item";
-      row.setAttribute("role", "option");
-      row.dataset.value = value.toLowerCase();
-
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.value = value;
-
-      if (type === "company" && selectedCompanies.has(value)) cb.checked = true;
-      if (type === "skill" && selectedSkills.has(value)) cb.checked = true;
-
-      const text = document.createElement("span");
-      text.textContent = value;
-
-      row.appendChild(cb);
-      row.appendChild(text);
-      body.appendChild(row);
+    rows.forEach((row) => {
+      const val = row.dataset.value || "";
+      row.style.display = val.includes(q) ? "" : "none";
     });
 
-    menuEl.appendChild(header);
-    menuEl.appendChild(body);
+    syncSelectAllState();
+  });
 
-    doneBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      closeAllMenus();
-    });
+  // Select All toggles only currently visible options
+  selectAllCb.addEventListener("change", () => {
+    const boxes = getVisibleItemCheckboxes();
+    const setRef = type === "company" ? selectedCompanies : selectedSkills;
 
-    search.addEventListener("input", () => {
-      const q = norm(search.value).toLowerCase();
-      const rows = Array.from(body.querySelectorAll(".multi-item"));
-      rows.forEach((row) => {
-        const val = row.dataset.value || "";
-        row.style.display = val.includes(q) ? "" : "none";
+    if (selectAllCb.checked) {
+      boxes.forEach((b) => {
+        b.checked = true;
+        setRef.add(norm(b.value));
       });
-    });
+    } else {
+      boxes.forEach((b) => {
+        b.checked = false;
+        setRef.delete(norm(b.value));
+      });
+    }
 
-    body.addEventListener("change", (e) => {
-      const cb = e.target;
-      if (!(cb instanceof HTMLInputElement) || cb.type !== "checkbox") return;
+    selectAllCb.indeterminate = false;
+    updatePillLabels();
+    applyFiltersAndSort();
+  });
 
-      const val = norm(cb.value);
-      if (!val) return;
+  // Individual checkbox change (does not close)
+  body.addEventListener("change", (e) => {
+    const cb = e.target;
+    if (!(cb instanceof HTMLInputElement) || cb.type !== "checkbox") return;
 
-      const setRef = type === "company" ? selectedCompanies : selectedSkills;
+    if (cb.value === "__select_all__") return;
 
-      if (cb.checked) setRef.add(val);
-      else setRef.delete(val);
+    const val = norm(cb.value);
+    if (!val) return;
 
-      updatePillLabels();
-      applyFiltersAndSort();
-    });
-  }
+    const setRef = type === "company" ? selectedCompanies : selectedSkills;
 
-  function applyFiltersAndSort(){
-    if (!workGrid) return;
-    const sortVal = sortSelect?.value || "time-desc";
+    if (cb.checked) setRef.add(val);
+    else setRef.delete(val);
 
-    let filtered = cards.filter((card) => {
-      const companyOk = selectedCompanies.size === 0 || selectedCompanies.has(getCompany(card));
-      const skills = getSkills(card);
-      const skillOk = selectedSkills.size === 0 || skills.some(s => selectedSkills.has(s));
-      return companyOk && skillOk;
-    });
+    updatePillLabels();
+    applyFiltersAndSort();
+    syncSelectAllState();
+  });
 
-    filtered.sort((a,b) => {
-      if (sortVal === "time-desc") return timeValue(b) - timeValue(a);
-      if (sortVal === "time-asc") return timeValue(a) - timeValue(b);
-      if (sortVal === "company-asc") return getCompany(a).localeCompare(getCompany(b));
-      if (sortVal === "company-desc") return getCompany(b).localeCompare(getCompany(a));
-      return 0;
-    });
+  // Initial sync
+  syncSelectAllState();
+}
 
-    workGrid.innerHTML = "";
-    filtered.forEach(c => workGrid.appendChild(c));
-  }
+// Init menus
+buildMenu(companyMenu, allCompanies, "company");
+buildMenu(skillMenu, allSkills, "skill");
+updatePillLabels();
+applyFiltersAndSort();
 
-  buildMenu(companyMenu, allCompanies, "company");
-  buildMenu(skillMenu, allSkills, "skill");
-  updatePillLabels();
-  applyFiltersAndSort();
+// Open menus
+const companyPill = companyBtn?.closest(".multi-pill");
+const skillPill = skillBtn?.closest(".multi-pill");
 
-  const companyPill = companyBtn?.closest(".multi-pill");
-  const skillPill = skillBtn?.closest(".multi-pill");
+if (companyBtn && companyMenu && companyPill) {
+  companyBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMenu(companyPill, companyBtn, companyMenu);
+  });
+}
 
-  if (companyBtn && companyMenu && companyPill){
-    companyBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleMenu(companyPill, companyBtn, companyMenu);
-    });
-  }
+if (skillBtn && skillMenu && skillPill) {
+  skillBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMenu(skillPill, skillBtn, skillMenu);
+  });
+}
 
-  if (skillBtn && skillMenu && skillPill){
-    skillBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleMenu(skillPill, skillBtn, skillMenu);
-    });
-  }
+// Sort change
+if (sortSelect) {
+  sortSelect.addEventListener("change", () => applyFiltersAndSort());
+}
 
-  if (sortSelect){
-    sortSelect.addEventListener("change", () => applyFiltersAndSort());
-  }
-
-  // Click outside closes menus
-  document.addEventListener("click", () => closeAllMenus());
+// Click outside closes menus
+document.addEventListener("click", () => closeAllMenus());
 
 
   /* =============================
-     EmailJS contact form
-  ============================= */
-  const EMAILJS_PUBLIC_KEY = "bDr9U0AMBEfmBl6z3";
-  const EMAILJS_SERVICE_ID = "service_qjjmsek";
-  const TEMPLATE_TO_YOU = "template_0escg43";
-  const TEMPLATE_TO_USER = "template_ps0p6rs";
-
-  if (window.emailjs) {
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-  }
-
-  const contactForm = document.getElementById("contact-form");
-
-  if (contactForm) {
-    contactForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const submitBtn = contactForm.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-
-      const from_name = document.getElementById("name").value.trim();
-      const reply_to = document.getElementById("email").value.trim();
-      const subject = document.getElementById("subject").value.trim();
-      const message = document.getElementById("message").value.trim();
-
-      if (!from_name || !reply_to || !subject || !message) {
-        alert("Please fill in all fields.");
-        return;
-      }
-
-      try {
-        submitBtn.disabled = true;
-        submitBtn.textContent = "Sending...";
-
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          TEMPLATE_TO_YOU,
-          { from_name, reply_to, subject, message }
-        );
-
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          TEMPLATE_TO_USER,
-          { from_name, reply_to, subject, message }
-        );
-
-        alert("✅ Message sent!");
-        contactForm.reset();
-      } catch (err) {
-        console.error(err);
-        alert("❌ Failed to send message.");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    });
-  }
-
-/* =============================
    Expertise cards (fixed collapsed height, expanded height = longest content)
 ============================= */
 const expertiseGrid = document.getElementById("expertiseGrid");

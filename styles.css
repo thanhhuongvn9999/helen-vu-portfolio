@@ -294,7 +294,7 @@ body {
   border-radius: var(--radius-md);
 
   /* 🔑 Equal top & bottom space */
-  padding: 16px; /* slightly smaller than 18px for tighter card */
+  padding: 14px; /* slightly smaller than 18px for tighter card */
 
   border: 1px solid rgba(15, 23, 42, 0.7);
   box-shadow: 0 18px 40px rgba(0,0,0,0.55);
@@ -349,7 +349,7 @@ body {
 
 /* Chevron row: centered, no extra bottom gap */
 .expertise-chevron{
-  margin-top: 14px;   /* controls distance from title */
+  margin-top: 10px;   /* controls distance from title */
   margin-bottom: 0;   /* 🔑 critical: no extra bottom space */
   align-self: center;
 }

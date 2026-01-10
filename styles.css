@@ -262,7 +262,7 @@ body {
 /* ============================= */
 
 :root{
-  --expertise-collapsed-h: 128px;   /* collapsed height */
+  --expertise-collapsed-h: 120px;   /* collapsed height */
   --expertise-expanded-h: 280px;    /* expanded height (JS will override) */
 }
 
@@ -320,6 +320,48 @@ body {
 .expertise-card.is-open{
   height: var(--expertise-expanded-h);
   border-color: rgba(250,204,21,0.45);
+}
+
+/* ============================= */
+/* Collapsed layout: center icon + title + chevron */
+/* ============================= */
+
+/* collapsed only: center content vertically */
+.expertise-card:not(.is-open){
+  justify-content: center;
+}
+
+/* keep the header row aligned nicely */
+.expertise-head{
+  display: flex;
+  align-items: center;          /* icon and title aligned */
+  gap: 12px;
+}
+
+/* make title align nicely and not push chevron */
+.expertise-title{
+  flex: 1;
+}
+
+/* put chevron centered under the title area */
+.expertise-chevron{
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+/* collapsed: hide the details without affecting centering */
+.expertise-card:not(.is-open) .expertise-body{
+  display: none;
+}
+
+/* open: show details */
+.expertise-card.is-open{
+  justify-content: flex-start;
+}
+
+.expertise-card.is-open .expertise-body{
+  display: block;
 }
 
 /* ============================= */

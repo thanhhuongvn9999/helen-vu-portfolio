@@ -1467,22 +1467,40 @@ flex-direction: column;
 
 /* Shorter gap between filter options */
 .multi-menu{
-  padding: 10px;            /* slightly tighter */
+  padding: 8px;            /* slightly tighter */
 }
 
 .multi-menu-body{
   gap: 5px !important;      /* ✅ tighter than 8px */
-  padding: 8px 10px 10px !important;
+  padding: 6px 10px 8px !important;
 }
 
+/* each option row (THIS controls vertical gap) */
 .multi-item{
-  padding: 6px 10px !important;  /* ✅ shorter row height */
-  gap: 10px;
+  display: flex;
+  align-items: center;
+
+  padding: 4px 8px !important;  /* 🔥 key fix: reduce vertical padding */
+  gap: 8px;                     /* horizontal gap only */
+  margin: 0 !important;         /* remove any default spacing */
+
+  line-height: 1.1;             /* tighter row height */
 }
 
+/* checkbox size consistency */
+.multi-item input[type="checkbox"]{
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  margin: 0;
+}
+
+/* text */
 .multi-item span{
-  line-height: 1.15 !important;  /* ✅ tighter */
-  font-size: 0.90rem;            /* keep readable */
+  margin: 0;
+  line-height: 1.1 !important;
+  font-size: 0.90rem;
 }
 
 /* ============================= */

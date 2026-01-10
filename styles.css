@@ -1235,107 +1235,130 @@ flex-direction: column;
   color: rgba(250,204,21,0.85);
 }
 
+/* =============================
+   FILTER DROPDOWN (header + search + tighter spacing)
+============================= */
+
 .multi-menu{
   position: absolute;
   top: calc(100% + 10px);
   left: 0;
   right: 0;
+
   background: linear-gradient(145deg, #0b0c13, #11131a);
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 18px;
   box-shadow: 0 22px 60px rgba(0,0,0,0.65);
+
   padding: 10px;
-  z-index: 50;
+  z-index: 9999;
+
   display: none;
   max-height: 320px;
   overflow: auto;
 }
 
-/* Menu header (Excel-like) */
+.multi-menu.open{
+  display: block !important;
+}
+
+/* Header area: Done on top-left, search below it */
 .multi-menu-header{
   position: sticky;
   top: 0;
   z-index: 2;
+
   background: linear-gradient(145deg, #0b0c13, #11131a);
-  padding: 10px 10px 8px;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
 
-.multi-menu-title{
-  font-size: 0.82rem;
-  color: rgba(226,232,240,0.85);
-  font-weight: 600;
-}
-
-.multi-menu-actions{
-  display: flex;
-  gap: 8px;
-}
-
-.multi-mini-btn{
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: transparent;
-  color: rgba(226,232,240,0.88);
-  padding: 7px 10px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.multi-mini-btn:hover{
-  border-color: rgba(250,204,21,0.25);
-  color: var(--accent);
-}
-
-.multi-mini-btn.primary{
-  background: rgba(250,204,21,0.12);
-  border-color: rgba(250,204,21,0.22);
-  color: var(--accent);
-}
-
-
-.multi-pill.is-open .multi-menu{
-  display: block;
-}
-
-.multi-menu-body{
-  padding: 10px 12px 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;              /* ✅ smaller vertical gap */
+  align-items: flex-start;
+  gap: 10px;
+
+  padding: 8px 10px 10px;
+
+  border-bottom: none !important; /* remove the divider line */
+}
+
+/* Done button on left */
+.multi-menu button[data-done]{
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px 12px;
+  border-radius: 999px;
+
+  background: rgba(255,255,255,0.95);
+  color: #0b0c13;
+  border: 1px solid rgba(148,163,184,0.35);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.multi-menu button[data-done]:hover{
+  background: var(--accent);
+  color: #111827;
+  border-color: rgba(250,204,21,0.55);
+  transform: translateY(-1px);
+}
+
+.multi-menu button[data-done]:active{
+  transform: translateY(0);
+}
+
+/* Search bar */
+.multi-search{
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(5, 6, 9, 0.95);
+
+  padding: 9px 12px;
+  color: rgba(226,232,240,0.92);
+
+  font-family: inherit;
+  font-size: 0.86rem;
+  outline: none;
+}
+
+.multi-search::placeholder{
+  color: rgba(156,163,175,0.75);
+}
+
+.multi-search:focus{
+  border-color: rgba(250,204,21,0.45);
+  box-shadow: 0 0 0 1px rgba(250,204,21,0.20);
+}
+
+/* Tighter options spacing */
+.multi-menu-body{
+  padding: 8px 10px 10px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 5px !important;
 }
 
 .multi-item{
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;     /* ✅ tighter row padding */
+
+  padding: 6px 10px !important;
   border-radius: 12px;
   cursor: pointer;
 }
 
-.multi-item span{
-  font-size: 0.85rem;
-  color: rgba(226,232,240,0.92);
-  line-height: 1.25;
-}
-
-
 .multi-item:hover{
   background: rgba(250, 204, 21, 0.06);
 }
-
-.multi-menu-header{
-  display: flex;
-  justify-content: flex-end; /* ✅ only Done on the right */
-  padding: 10px 12px 0;
-}
-
 
 .multi-item input{
   width: 16px;
@@ -1344,9 +1367,11 @@ flex-direction: column;
 }
 
 .multi-item span{
-  font-size: 0.92rem;
+  font-size: 0.90rem;
   color: rgba(226,232,240,0.92);
+  line-height: 1.15 !important;
 }
+
 
 /* ✅ JS adds .open to the menu, so make it visible */
 .multi-menu.open{

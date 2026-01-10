@@ -349,7 +349,7 @@ body {
 
 /* Chevron row: centered, no extra bottom gap */
 .expertise-chevron{
-  margin-top: 10px;   /* controls distance from title */
+  margin-top: 8px;   /* controls distance from title */
   margin-bottom: 0;   /* 🔑 critical: no extra bottom space */
   align-self: center;
 }

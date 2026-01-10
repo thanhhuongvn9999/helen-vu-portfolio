@@ -294,7 +294,7 @@ body {
   border-radius: var(--radius-md);
 
   /* 🔑 Equal top & bottom space */
-  padding: 14px; /* slightly smaller than 18px for tighter card */
+  padding: 12px; /* slightly smaller than 18px for tighter card */
 
   border: 1px solid rgba(15, 23, 42, 0.7);
   box-shadow: 0 18px 40px rgba(0,0,0,0.55);

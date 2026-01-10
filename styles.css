@@ -345,7 +345,7 @@ body {
 
 /* put chevron centered under the title area */
 .expertise-chevron{
-  margin-top: 14px;
+  margin-top: 10px;
   display: flex;
   justify-content: center;
 }

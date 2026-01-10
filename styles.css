@@ -257,7 +257,9 @@ body {
 }
 
 
+/* ============================= */
 /* Expertise grid */
+/* ============================= */
 
 /* Desktop */
 .expertise-grid {
@@ -280,7 +282,9 @@ body {
   }
 }
 
-
+/* ============================= */
+/* Expertise card */
+/* ============================= */
 
 .expertise-card {
   background: var(--bg-card);
@@ -288,43 +292,101 @@ body {
   padding: 22px 22px 20px;
   border: 1px solid rgba(15, 23, 42, 0.7);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  transition: transform 0.18s ease,
+              box-shadow 0.18s ease,
+              border-color 0.18s ease;
+}
+
+.expertise-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(250, 204, 21, 0.25);
+}
+
+/* ============================= */
+/* Card header (icon + title + chevron) */
+/* ============================= */
+
+.expertise-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .expertise-icon {
   width: 48px;
   height: 48px;
   border-radius: 14px;
-display: flex;
-align-items: center;
+  display: flex;
+  align-items: center;
   justify-content: center;
   background: rgba(15, 23, 42, 0.65);
   border: 1px solid rgba(148, 163, 184, 0.15);
+  flex-shrink: 0;
 }
 
 .expertise-icon i {
-  font-size: 22px;   /* smaller = lighter feel */
+  font-size: 22px;
   color: var(--accent);
-  opacity: 0.9;      /* subtle */
+  opacity: 0.9;
 }
-
-
-
 
 .expertise-title {
   font-size: 0.9rem;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin: 0;
+  flex: 1;
 }
+
 .nowrap {
   white-space: nowrap;
 }
 
+/* Chevron */
+.expertise-chevron {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  flex-shrink: 0;
+}
+
+.expertise-chevron i {
+  font-size: 0.85rem;
+  color: rgba(250, 204, 21, 0.9);
+  transition: transform 0.18s ease;
+}
+
+/* ============================= */
+/* Expandable content */
+/* ============================= */
+
+.expertise-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.22s ease;
+}
+
+/* spacing only when open */
+.expertise-card.is-open .expertise-body {
+  margin-top: 10px;
+}
 
 .expertise-text {
   font-size: 0.80rem;
-line-height: 1.6;
+  line-height: 1.6;
   color: var(--text-muted);
 }
+
+/* rotate chevron when open */
+.expertise-card.is-open .expertise-chevron i {
+  transform: rotate(180deg);
+}
+
 
 /* Testimonials */
 

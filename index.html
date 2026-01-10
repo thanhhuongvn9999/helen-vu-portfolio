@@ -1139,8 +1139,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initResumeCollapse();
 
+
   /* =============================
-     Portfolio sort + filter
+     Portfolio sort + filter (fixed)
   ============================= */
   const workGrid = document.querySelector(".work-grid");
   const cards = Array.from(document.querySelectorAll(".work-card"));
@@ -1153,6 +1154,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const companyLabel = document.getElementById("companyLabel");
   const skillLabel = document.getElementById("skillLabel");
 
+  const companyPill = companyBtn?.closest(".multi-pill");
+  const skillPill = skillBtn?.closest(".multi-pill");
+
   const norm = (s) => (s || "").trim();
 
   function getCompany(card) {
@@ -1160,46 +1164,222 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getSkills(card) {
-    return norm(card.dataset.skills).split(",").map(norm).filter(Boolean);
+    return norm(card.dataset.skills)
+      .split(",")
+      .map((x) => norm(x))
+      .filter(Boolean);
   }
 
   function timeValue(card) {
     const raw = norm(card.dataset.time);
     if (!raw) return 0;
     const iso = /^\d{4}-\d{2}$/.test(raw) ? `${raw}-01` : raw;
-    return Date.parse(iso) || 0;
+    return Number.isFinite(Date.parse(iso)) ? Date.parse(iso) : 0;
   }
 
-  function updatePills() {
-    if (companyLabel) companyLabel.textContent = "All";
-    if (skillLabel) skillLabel.textContent = "All";
+  // Selected values
+  const selectedCompanies = new Set(); // empty means All
+  const selectedSkills = new Set();    // empty means All
+
+  function uniqSorted(arr) {
+    return Array.from(new Set(arr.filter(Boolean))).sort((a, b) =>
+      a.localeCompare(b)
+    );
+  }
+
+  function buildMenu(menuEl, items, type) {
+    if (!menuEl) return;
+
+    menuEl.innerHTML = "";
+
+    // Header with Done button (matches your CSS hooks)
+    const header = document.createElement("div");
+    header.className = "multi-menu-header";
+
+    const doneBtn = document.createElement("button");
+    doneBtn.type = "button";
+    doneBtn.textContent = "Done";
+    doneBtn.setAttribute("data-done", "1");
+    header.appendChild(doneBtn);
+
+    const body = document.createElement("div");
+    body.className = "multi-menu-body";
+
+    items.forEach((value) => {
+      const row = document.createElement("label");
+      row.className = "multi-item";
+      row.setAttribute("role", "option");
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.value = value;
+
+      // keep in sync if rebuilding
+      if (type === "company" && selectedCompanies.has(value)) cb.checked = true;
+      if (type === "skill" && selectedSkills.has(value)) cb.checked = true;
+
+      const text = document.createElement("span");
+      text.textContent = value;
+
+      row.appendChild(cb);
+      row.appendChild(text);
+      body.appendChild(row);
+    });
+
+    menuEl.appendChild(header);
+    menuEl.appendChild(body);
+
+    // Done closes menu only (does not reset)
+    doneBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeAllMenus();
+      applyFiltersAndSort();
+    });
+
+    // Checkbox changes selection live (filter updates immediately)
+    body.addEventListener("change", (e) => {
+      const cb = e.target;
+      if (!(cb instanceof HTMLInputElement) || cb.type !== "checkbox") return;
+
+      const val = norm(cb.value);
+      if (!val) return;
+
+      const setRef = type === "company" ? selectedCompanies : selectedSkills;
+
+      if (cb.checked) setRef.add(val);
+      else setRef.delete(val);
+
+      updatePillLabels();
+      applyFiltersAndSort();
+    });
+  }
+
+  function updatePillLabels() {
+    if (companyLabel) {
+      if (selectedCompanies.size === 0) {
+        companyLabel.textContent = "All";
+      } else if (selectedCompanies.size === 1) {
+        companyLabel.textContent = Array.from(selectedCompanies)[0];
+      } else {
+        const first = Array.from(selectedCompanies)[0];
+        companyLabel.textContent = `${first} +${selectedCompanies.size - 1}`;
+      }
+    }
+
+    if (skillLabel) {
+      if (selectedSkills.size === 0) {
+        skillLabel.textContent = "All";
+      } else if (selectedSkills.size === 1) {
+        skillLabel.textContent = Array.from(selectedSkills)[0];
+      } else {
+        const first = Array.from(selectedSkills)[0];
+        skillLabel.textContent = `${first} +${selectedSkills.size - 1}`;
+      }
+    }
+  }
+
+  function closeAllMenus() {
+    if (companyPill) companyPill.classList.remove("is-open");
+    if (skillPill) skillPill.classList.remove("is-open");
+    if (companyMenu) companyMenu.classList.remove("open");
+    if (skillMenu) skillMenu.classList.remove("open");
+    if (companyBtn) companyBtn.setAttribute("aria-expanded", "false");
+    if (skillBtn) skillBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleMenu(which) {
+    const isCompany = which === "company";
+
+    const pill = isCompany ? companyPill : skillPill;
+    const menu = isCompany ? companyMenu : skillMenu;
+    const btn = isCompany ? companyBtn : skillBtn;
+
+    if (!pill || !menu || !btn) return;
+
+    const willOpen = !pill.classList.contains("is-open");
+    closeAllMenus();
+
+    if (willOpen) {
+      pill.classList.add("is-open");
+      menu.classList.add("open"); // your CSS supports .multi-menu.open
+      btn.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  function matchesCompany(card) {
+    if (selectedCompanies.size === 0) return true;
+    return selectedCompanies.has(getCompany(card));
+  }
+
+  function matchesSkill(card) {
+    if (selectedSkills.size === 0) return true;
+    const skills = getSkills(card);
+    return skills.some((s) => selectedSkills.has(s));
   }
 
   function applyFiltersAndSort() {
     if (!workGrid) return;
 
-    let filtered = [...cards];
+    let filtered = cards.filter((c) => matchesCompany(c) && matchesSkill(c));
 
     const sortVal = sortSelect?.value || "time-desc";
 
     filtered.sort((a, b) => {
       if (sortVal === "time-desc") return timeValue(b) - timeValue(a);
       if (sortVal === "time-asc") return timeValue(a) - timeValue(b);
+
+      if (sortVal === "company-asc") return getCompany(a).localeCompare(getCompany(b));
+      if (sortVal === "company-desc") return getCompany(b).localeCompare(getCompany(a));
+
       return 0;
     });
 
     workGrid.innerHTML = "";
     filtered.forEach((c) => workGrid.appendChild(c));
 
-    updatePills();
+    updatePillLabels();
   }
 
-  if (workGrid && cards.length) {
-    if (sortSelect) {
-      sortSelect.addEventListener("change", applyFiltersAndSort);
-    }
+  function initFilters() {
+    if (!workGrid || cards.length === 0) return;
+
+    const companies = uniqSorted(cards.map(getCompany));
+    const skills = uniqSorted(cards.flatMap(getSkills));
+
+    buildMenu(companyMenu, companies, "company");
+    buildMenu(skillMenu, skills, "skill");
+
+    updatePillLabels();
     applyFiltersAndSort();
   }
+
+  // Button handlers
+  if (companyBtn) {
+    companyBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu("company");
+    });
+  }
+
+  if (skillBtn) {
+    skillBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleMenu("skill");
+    });
+  }
+
+  // Close menus on outside click + Escape
+  document.addEventListener("click", () => closeAllMenus());
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeAllMenus();
+  });
+
+  if (sortSelect) {
+    sortSelect.addEventListener("change", () => applyFiltersAndSort());
+  }
+
+  initFilters();
+
 
   /* =============================
      EmailJS contact form

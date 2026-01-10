@@ -952,6 +952,8 @@ Currently a second-year STEM MBA candidate at Simon Business School graduating i
     </div>
   </div>
 </a>
+
+</div> 
 </section>
 
 
@@ -1140,107 +1142,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initResumeCollapse();
 
 
-  /* =============================
-     Portfolio sort + filter (fixed)
-  ============================= */
-  const workGrid = document.querySelector(".work-grid");
-  const cards = Array.from(document.querySelectorAll(".work-card"));
-  const sortSelect = document.getElementById("sortSelect");
-
-  const companyBtn = document.getElementById("companyBtn");
-  const skillBtn = document.getElementById("skillBtn");
-  const companyMenu = document.getElementById("companyMenu");
-  const skillMenu = document.getElementById("skillMenu");
-  const companyLabel = document.getElementById("companyLabel");
-  const skillLabel = document.getElementById("skillLabel");
-
-  const companyPill = companyBtn?.closest(".multi-pill");
-  const skillPill = skillBtn?.closest(".multi-pill");
-
-  const norm = (s) => (s || "").trim();
-
-  function getCompany(card) {
-    return norm(card.dataset.company);
-  }
-
-  function getSkills(card) {
-    return norm(card.dataset.skills)
-      .split(",")
-      .map((x) => norm(x))
-      .filter(Boolean);
-  }
-
-  function timeValue(card) {
-    const raw = norm(card.dataset.time);
-    if (!raw) return 0;
-    const iso = /^\d{4}-\d{2}$/.test(raw) ? `${raw}-01` : raw;
-    return Number.isFinite(Date.parse(iso)) ? Date.parse(iso) : 0;
-  }
-
-  // Selected values
-  const selectedCompanies = new Set(); // empty means All
-  const selectedSkills = new Set();    // empty means All
-
-  function uniqSorted(arr) {
-    return Array.from(new Set(arr.filter(Boolean))).sort((a, b) =>
-      a.localeCompare(b)
-    );
-  }
-
-  function buildMenu(menuEl, items, type) {
-    if (!menuEl) return;
-
-    menuEl.innerHTML = "";
-
-    // Header with Done button (matches your CSS hooks)
-    const header = document.createElement("div");
-    header.className = "multi-menu-header";
-
-    const doneBtn = document.createElement("button");
-    doneBtn.type = "button";
-    doneBtn.textContent = "Done";
-    doneBtn.setAttribute("data-done", "1");
-    header.appendChild(doneBtn);
-
-    const body = document.createElement("div");
-    body.className = "multi-menu-body";
-
-    items.forEach((value) => {
-      const row = document.createElement("label");
-      row.className = "multi-item";
-      row.setAttribute("role", "option");
-
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.value = value;
-
-      // keep in sync if rebuilding
-      if (type === "company" && selectedCompanies.has(value)) cb.checked = true;
-      if (type === "skill" && selectedSkills.has(value)) cb.checked = true;
-
-      const text = document.createElement("span");
-      text.textContent = value;
-
-      row.appendChild(cb);
-      row.appendChild(text);
-      body.appendChild(row);
-    });
-
-    menuEl.appendChild(header);
-    menuEl.appendChild(body);
-
-    // Done closes menu only (does not reset)
-    doneBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      closeAllMenus();
-      applyFiltersAndSort();
-    });
-
-    // Checkbox changes selection live (filter updates immediately)
-    body.addEventListener("change", (e) => {
-      const cb = e.target;
-      if (!(cb instanceof HTMLInputElement) || cb.type !== "checkbox") return;
-  /* =============================
+   /* =============================
      Portfolio sort + filter (multi-select + Done + Search)
   ============================= */
   const workGrid = document.querySelector(".work-grid");
@@ -1271,11 +1173,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return Date.parse(iso) || 0;
   }
 
-  // Build unique lists
-  const allCompanies = Array.from(new Set(cards.map(getCompany))).filter(Boolean).sort((a,b)=>a.localeCompare(b));
-  const allSkills = Array.from(new Set(cards.flatMap(getSkills))).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  const allCompanies = Array.from(new Set(cards.map(getCompany)))
+    .filter(Boolean)
+    .sort((a,b)=>a.localeCompare(b));
 
-  // Selected sets (multi)
+  const allSkills = Array.from(new Set(cards.flatMap(getSkills)))
+    .filter(Boolean)
+    .sort((a,b)=>a.localeCompare(b));
+
   const selectedCompanies = new Set();
   const selectedSkills = new Set();
 
@@ -1317,7 +1222,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Prevent inside clicks from closing the dropdown
     menuEl.addEventListener("click", (e) => e.stopPropagation());
 
-    // Header (Done + Search)
     const header = document.createElement("div");
     header.className = "multi-menu-header";
 
@@ -1361,14 +1265,11 @@ document.addEventListener("DOMContentLoaded", () => {
     menuEl.appendChild(header);
     menuEl.appendChild(body);
 
-    // Done closes
     doneBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       closeAllMenus();
-      applyFiltersAndSort();
     });
 
-    // Search filter
     search.addEventListener("input", () => {
       const q = norm(search.value).toLowerCase();
       const rows = Array.from(body.querySelectorAll(".multi-item"));
@@ -1378,7 +1279,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // Change selection (do not close)
     body.addEventListener("change", (e) => {
       const cb = e.target;
       if (!(cb instanceof HTMLInputElement) || cb.type !== "checkbox") return;
@@ -1398,10 +1298,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyFiltersAndSort(){
     if (!workGrid) return;
-
     const sortVal = sortSelect?.value || "time-desc";
 
-    // Filter
     let filtered = cards.filter((card) => {
       const companyOk = selectedCompanies.size === 0 || selectedCompanies.has(getCompany(card));
       const skills = getSkills(card);
@@ -1409,7 +1307,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return companyOk && skillOk;
     });
 
-    // Sort
     filtered.sort((a,b) => {
       if (sortVal === "time-desc") return timeValue(b) - timeValue(a);
       if (sortVal === "time-asc") return timeValue(a) - timeValue(b);
@@ -1418,18 +1315,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return 0;
     });
 
-    // Render
     workGrid.innerHTML = "";
     filtered.forEach(c => workGrid.appendChild(c));
   }
 
-  // Init menus
   buildMenu(companyMenu, allCompanies, "company");
   buildMenu(skillMenu, allSkills, "skill");
   updatePillLabels();
   applyFiltersAndSort();
 
-  // Button open menu
   const companyPill = companyBtn?.closest(".multi-pill");
   const skillPill = skillBtn?.closest(".multi-pill");
 
@@ -1447,7 +1341,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Sort change
   if (sortSelect){
     sortSelect.addEventListener("change", () => applyFiltersAndSort());
   }

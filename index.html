@@ -1548,6 +1548,70 @@ if (expertiseGrid){
 }
 
 
+// =============================
+// Contact Form — EmailJS
+// =============================
+const EMAILJS_PUBLIC_KEY = "bDr9U0AMBEfmBl6z3";
+const EMAILJS_SERVICE_ID = "service_qjjmsek";
+const TEMPLATE_TO_YOU = "template_0escg43";
+const TEMPLATE_TO_USER = "template_ps0p6rs";
+
+// Init (v4 safe)
+emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+const contactForm = document.getElementById("contact-form");
+
+if (contactForm) {
+  contactForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = contactForm.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.textContent : "";
+
+    const from_name = document.getElementById("name")?.value.trim();
+    const reply_to = document.getElementById("email")?.value.trim();
+    const subject = document.getElementById("subject")?.value.trim();
+    const message = document.getElementById("message")?.value.trim();
+
+    if (!from_name || !reply_to || !subject || !message) {
+      alert("Please fill in all fields before sending.");
+      return;
+    }
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(reply_to);
+    if (!emailOk) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    const templateParams = { from_name, reply_to, subject, message };
+
+    try {
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+      }
+
+      // Send to you
+      await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_YOU, templateParams);
+
+      // Auto reply to user
+      await emailjs.send(EMAILJS_SERVICE_ID, TEMPLATE_TO_USER, templateParams);
+
+      alert("Message sent! I’ll get back to you within 48 hours.");
+      contactForm.reset();
+    } catch (err) {
+      console.error("EmailJS error:", err);
+      alert("Something went wrong. Please email me directly.");
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
+  });
+}
+
 
 });
 </script>

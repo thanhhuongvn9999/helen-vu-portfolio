@@ -369,7 +369,7 @@ As a second year STEM MBA candidate at Simon Business School, I am excited to co
         <div class="timeline-dates">Jun 2022 – Jun 2024</div>
         <ul class="timeline-list">
           <li>Served as product owner for the AirAsia Superapp in Vietnam, leading cross-functional sprints with UX Design, Engineering, and Data teams to localize customer journeys and scale platform performance across markets.</li>
-          <li>Partnered with Engineering &amp; Data teams to analyze user behavior &amp; merchant performance data, translated insights into product requirements, defined and managed product backlog priorities, reducing technical bottlenecks.</li>
+          <li>Partnered with Engineering and Data teams to analyze user behavior &amp; merchant performance data, translated insights into product requirements, defined and managed product backlog priorities, reducing technical bottlenecks.</li>
           <li>Drove product UX enhancement by collaborating with Design and Marketing to optimize user experience and promotion listings, validated improvements through A/B testing, boosting user engagement by 34%.</li>
           <li>Orchestrated go-to-market strategy including pricing, communication messaging and distribution channels by collaborating with Sales and Marketing, coordinating regional alignment and securing executive approval for the first-year rollout.</li>
           <li>Expanded ecosystem partnerships through API integration with payment providers and loyalty platforms to diversify offerings and strengthen loyalty program, driving a 20% rise in daily active users and a 27% increase in customer retention.</li>
@@ -1092,54 +1092,77 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  /* =============================
-     Resume collapse
-  ============================= */
-  const resumeSection = document.getElementById("resume");
 
-  function initResumeCollapse() {
-    if (!resumeSection) return;
+/* =============================
+   Resume collapse (UPDATED)
+============================= */
+const resumeSection = document.getElementById("resume");
 
-    const resumeCards = resumeSection.querySelectorAll(".timeline-content");
+function initResumeCollapse() {
+  if (!resumeSection) return;
 
-    resumeCards.forEach((card) => {
-      if (card.dataset.collapseInit === "1") return;
-      card.dataset.collapseInit = "1";
+  const resumeCards = resumeSection.querySelectorAll(".timeline-content");
 
-      const bodyWrap = document.createElement("div");
-      bodyWrap.className = "timeline-body";
-      while (card.firstChild) bodyWrap.appendChild(card.firstChild);
-      card.appendChild(bodyWrap);
+  resumeCards.forEach((card) => {
+    // ✅ Skip collapse for Education + Experiential Learning cards
+    // Add this attribute in HTML: <div class="timeline-content" data-no-collapse>
+    if (card.hasAttribute("data-no-collapse")) {
+      // If this card was previously initialized, clean it up
+      const existingBody = card.querySelector(".timeline-body");
+      if (existingBody) {
+        // Move children back out (so layout stays normal)
+        while (existingBody.firstChild) card.insertBefore(existingBody.firstChild, existingBody);
+        existingBody.remove();
+      }
 
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "card-toggle";
-      btn.textContent = "Show more";
-      btn.setAttribute("aria-expanded", "false");
-      card.appendChild(btn);
+      const existingBtn = card.querySelector(".card-toggle");
+      if (existingBtn) existingBtn.remove();
 
-      card.classList.add("is-collapsible", "is-collapsed");
+      card.classList.remove("is-collapsible", "is-collapsed", "is-expanded");
+      card.style.removeProperty("--collapse-height");
+      card.dataset.collapseInit = "0";
+      return;
+    }
 
-      const toggle = () => {
-        const expanded = card.classList.toggle("is-expanded");
-        card.classList.toggle("is-collapsed", !expanded);
-        btn.textContent = expanded ? "Show less" : "Show more";
-        btn.setAttribute("aria-expanded", expanded ? "true" : "false");
-      };
+    // Prevent double-init
+    if (card.dataset.collapseInit === "1") return;
+    card.dataset.collapseInit = "1";
 
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggle();
-      });
+    const bodyWrap = document.createElement("div");
+    bodyWrap.className = "timeline-body";
+    while (card.firstChild) bodyWrap.appendChild(card.firstChild);
+    card.appendChild(bodyWrap);
 
-      card.addEventListener("click", (e) => {
-        if (e.target.closest("a, button")) return;
-        toggle();
-      });
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "card-toggle";
+    btn.textContent = "Show more";
+    btn.setAttribute("aria-expanded", "false");
+    card.appendChild(btn);
+
+    card.classList.add("is-collapsible", "is-collapsed");
+
+    const toggle = () => {
+      const expanded = card.classList.toggle("is-expanded");
+      card.classList.toggle("is-collapsed", !expanded);
+      btn.textContent = expanded ? "Show less" : "Show more";
+      btn.setAttribute("aria-expanded", expanded ? "true" : "false");
+    };
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggle();
     });
-  }
 
-  initResumeCollapse();
+    card.addEventListener("click", (e) => {
+      if (e.target.closest("a, button")) return;
+      toggle();
+    });
+  });
+}
+
+initResumeCollapse();
+
 
 
 /* =============================

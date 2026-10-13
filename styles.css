@@ -89,17 +89,19 @@ body {
 .sidebar-role-pill {
   margin: 8px auto 18px;
   padding: 12px 24px;        /* ✅ bigger */
-  border-radius: 999px;
+  border-radius: 28px;       /* rounded box for 2 lines */
   border: 1px solid var(--accent-soft);
   font-size: 0.85rem;        /* ✅ slightly larger */
+  line-height: 1.5;
   color: var(--accent);
   background: rgba(15, 16, 22, 0.94);
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 
-  white-space: nowrap;       /* keep one line */
+  white-space: normal;       /* allow the <br> line break */
   max-width: 100%;           /* never overflow sidebar */
   box-sizing: border-box;
 }

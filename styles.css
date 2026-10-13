@@ -101,7 +101,7 @@ body {
   justify-content: center;
   text-align: center;
 
-  white-space: normal;       /* allow the <br> line break */
+  white-space: nowrap;       /* only break at the <br> */
   max-width: 100%;           /* never overflow sidebar */
   box-sizing: border-box;
 }
